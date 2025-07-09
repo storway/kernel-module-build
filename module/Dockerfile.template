@@ -11,7 +11,12 @@ RUN apt-get update && \
     libelf-dev \
     libssl-dev \
     bc \
-    wget
+    wget \
+    device-tree-compiler \ 
+    nano \
+    htop
+ # ric todo: remove nano and htop after debugging   
+
 
 WORKDIR /usr/src/app
 

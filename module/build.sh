@@ -67,9 +67,43 @@ build_module() {
 
 	mkdir -p "${output_dir}"
 	cd "${output_dir}"
+
+	#make -C /usr/src/headers/modules_prepare
+	#make -C /usr/src/headers M=$SRC_DIR modules
+
 	make -C "${headers_dir}" modules_prepare
 	make -C "${headers_dir}" M="$PWD" modules
 	rm -rf "$headers_dir"
+
+	#info "Module build complete. Output directory: ${output_dir}"
+
+	#echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+	#echo "Pre DTC"
+	#which dtc
+	#echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+	#pwd
+	#echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+	#ls /usr/src/app/src/
+	#echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+	#echo "Searching for the built module in ${output_dir}..."
+	#find / | grep "vc4-kms-dsi-rzw-t101p136cq-cm5-overlay"
+	#echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+
+	dtc -I dts -O dtb \
+    	-o vc4-kms-dsi-rzw-t101p136cq-cm5.dtbo \
+		/usr/src/app/src/vc4-kms-dsi-rzw-t101p136cq-cm5-overlay.dts
+		
+	#echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+	#echo "ls ."
+	#ls .
+	#echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+	#echo "Searching for dtbo..."
+	#find / | grep "vc4-kms-dsi-rzw-t101p136cq-cm5.dtbo"
+	#echo "Searching for dts..."
+	#find / | grep "vc4-kms-dsi-rzw-t101p136cq-cm5-overlay.dts"
+	#echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+	
+	info "Module build complete. Output directory: ${output_dir}"
 }
 
 main() {
