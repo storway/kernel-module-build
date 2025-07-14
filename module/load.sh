@@ -16,19 +16,31 @@ echo "OS Version is $OS_VERSION"
 # 	insmod "$file"
 # done
 
-if lsmod | grep -q panel_ilitek_ili9881c; then
-	rmmod panel_ilitek_ili9881c
+if lsmod | grep -q panel-ilitek-ili9881c; then
+	rmmod panel-ilitek-ili9881c
 fi
-file="$MOD_PATH"/panel_ilitek_ili9881c.ko
-echo Loading module from "$file"
-insmod "$file"
+#file="$MOD_PATH"/panel-ilitek-ili9881c.ko
+#echo Loading module from "$file"
+#insmod "$file"
 
-if lsmod | grep -q edatec_panel_regulator; then
-	rmmod edatec_panel_regulator
+if lsmod | grep -q edatec-panel-regulator; then
+	rmmod edatec-panel-regulator
 fi
-file="$MOD_PATH"/edatec_panel_regulator.ko
-echo Loading module from "$file"
-insmod "$file"
+#file="$MOD_PATH"/edatec-panel-regulator.ko
+#echo Loading module from "$file"
+#insmod "$file"
+
+echo "[INFO] Loading panel driver module..."
+#depmod -a
+#modprobe panel-ilitek-ili9881c
+insmod $MOD_PATH/panel-ilitek-ili9881c.ko
+
+echo "[INFO] Loading regulator driver module..."
+#depmod -a
+#modprobe edatec-panel-regulator
+
+#sudo modprobe regmap-i2c
+insmod $MOD_PATH/edatec-panel-regulator.ko
 
 #for mod in /opt/lib/modules/$OS_VERSION/*.ko; do
 #  	echo "loading module $mod ..."
@@ -58,7 +70,9 @@ if ! mountpoint -q /sys/kernel/config; then
 fi
 
 OVERLAY_NAME=hmi2002
-DTBO_PATH=/opt/lib/modules/$OS_VERSION/vc4-kms-dsi-rzw-t101p136cq-cm5.dtbo
+DTBO_PATH=$(ls $MOD_PATH/*.dtbo)
+
+echo "Found overlay $OVERLAY_NAME in $DTBO_PATH ."
 
 # Create the overlay-configfs folder
 mkdir -p /sys/kernel/config/device-tree/overlays/$OVERLAY_NAME

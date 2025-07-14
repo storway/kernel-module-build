@@ -1,7 +1,8 @@
 version: '2'
 
 services:
-  load:
+
+  drv-load:
     build:
       context: ./module
       dockerfile: Dockerfile.template
@@ -12,9 +13,31 @@ services:
 
     privileged: true
     restart: on-failure
-  check:
+
+  drv-check:
     build:
       context: ./check
       dockerfile: Dockerfile.template
     depends_on:
-      - load
+      - drv-load
+
+  UI:
+    build:
+      context: ./ui
+      dockerfile: Dockerfile.template
+    privileged: true  # <-- Easiest, but not always best for production
+    environment:
+      - UDEV=1
+    devices:
+      - /dev/input
+      - /dev/input:/dev/input
+      - /dev/uinput
+      - /dev/uinput:/dev/uinput
+      - /dev/tty
+      - /dev/tty:/dev/tty
+      - /dev/fb0
+      - /dev/fb0:/dev/fb0
+    #volumes:
+    #  - /tmp/.X11-unix:/tmp/.X11-unix
+    #  - /run/dbus:/run/dbus
+    #  - /dev:/dev

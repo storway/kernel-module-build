@@ -5,6 +5,23 @@
 set -o errexit
 set -o pipefail
 
+# --------------------------------------------------------
+# STORWAY - HMI2002 CONFIGURATION
+# rpi5:
+OVERLAY_NAME="vc4-kms-dsi-rzw-t101p136cq-rpi5-2lane-overlay"
+DTBO_PATH="/sys/kernel/config/device-tree/overlays/$OVERLAY_NAME.dtbo"
+
+# rpi4:
+# OVERLAY_NAME="vc4-kms-dsi-rzw-t101p136cq-rpi4-2lane-overlay"
+
+# cm5:
+# OVERLAY_NAME="vc4-kms-dsi-rzw-t101p136cq-cm5-overlay"
+
+# overlay:
+# OVERLAY_NAME="vc4-kms-dsi-rzw-t101p136cq-overlay"
+
+# --------------------------------------------------------
+
 readonly script_name=$(basename "${0}")
 
 usage() {
@@ -35,6 +52,9 @@ fetch_headers()
 	url="${files_url}/${image_path}/${slug}/${version//+/%2B}/kernel_modules_headers.tar.gz"
 	filename=$(basename "$url")
 	tmp_path=$(mktemp --directory)
+	#tmp_path="/usr/src/headers/"
+	#mkdir -p "${tmp_path}"
+	#echo "[INFO] fetch_headers: Fetching headers for '$slug' at version '$version' from '$url' to '$tmp_path'"
 
 	# See if the header files are already provided
 	if [ -f "/usr/src/app/${filename}" ]; then
@@ -58,12 +78,17 @@ fetch_headers()
 		fail "Unable to extract $tmp_path/$filename."
 	fi
 	/usr/src/app/workarounds.sh "${slug}" "${version}" "${tmp_path}"
+	
 	echo "${tmp_path}"
 }
 
 build_module() {
 	local headers_dir="${1}"
 	local output_dir="${2}"
+
+	#echo "============================ "
+	#echo "headers dir ${headers_dir}"
+	#echo "============================ "
 
 	mkdir -p "${output_dir}"
 	cd "${output_dir}"
@@ -75,7 +100,7 @@ build_module() {
 	make -C "${headers_dir}" M="$PWD" modules
 	rm -rf "$headers_dir"
 
-	#info "Module build complete. Output directory: ${output_dir}"
+	info "Drivers build complete. Output directory: ${output_dir}"
 
 	# # DEBUGGING
 	# echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
@@ -91,8 +116,8 @@ build_module() {
 	# echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 
 	dtc -I dts -O dtb \
-    	-o vc4-kms-dsi-rzw-t101p136cq-cm5.dtbo \
-		/usr/src/app/src/vc4-kms-dsi-rzw-t101p136cq-cm5-overlay.dts
+    	-o $OVERLAY_NAME.dtbo \
+		/usr/src/app/src/$OVERLAY_NAME.dts
 
 	# # DEBUGGING	
 	# echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
@@ -105,7 +130,7 @@ build_module() {
 	# find / | grep "vc4-kms-dsi-rzw-t101p136cq-cm5-overlay.dts"
 	# echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 	
-	info "Module build complete. Output directory: ${output_dir}"
+	info "Overlay build complete. Overlay name: ${OVERLAY_NAME}"
 }
 
 main() {
